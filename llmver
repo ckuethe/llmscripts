@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl --silent -m 2 http://localhost:11434/api/version | jq
