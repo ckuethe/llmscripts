@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -ne 1 ] || [ "x$1" == "x-h" ] ; then
+	echo "Usage: ${BASH_ARGV0} <ver>"
+	exit 1
+fi
+
+V=$1
+
+curl --silent --output /dev/null --fail "https://github.com/ollama/ollama/releases/download/v${V}/sha256sum.txt"
+
+if [ $? -ne 0 ] ; then
+	echo "Unable to verify existence of version ${V}"
+	exit
+fi
+
+D="${HOME}/dists/${V}/"
+mkdir -p "${D}"
+cd "${D}"
+for F in ollama-linux-amd64-rocm ollama-linux-amd64 ; do
+	curl --location --continue-at - --output "${F}.tgz" "https://github.com/ollama/ollama/releases/download/v${V}/${F}.tgz"
+done
