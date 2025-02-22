@@ -1,0 +1,22 @@
+#!/bin/bash
+
+SRV="localhost:11434"
+
+if [ $# -eq 0 ] ; then
+	MODEL=$(curl -s ${SRV}/api/ps | jq '.models[0].name' |tr -d '"')
+elif [ $# -eq 1 ] ; then
+	if [ "x-h" == "x$1" ] || [ "x-h" == "x$1" ] || [ "x-h" == "x$1" ] ; then
+		echo "Usage: $BASH_ARGV0 [model]"
+		echo
+		echo "If model is not specified, the first loaded model will be tested"
+		exit 0
+	fi
+	MODEL=$1
+else
+	echo "Uh, what?"
+	exit 1
+fi
+
+#jq magic from this comment https://github.com/ollama/ollama/issues/5843#issuecomment-2242592143
+curl -s ${SRV}/api/generate -d "{\"model\":\"${MODEL}\", \"prompt\":\"count from 1 to 50\", \"stream\":false}" | jq '{"tokens_per_sec":(.eval_count/(.eval_duration/1000000000))}'
+
