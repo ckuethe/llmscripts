@@ -1,11 +1,17 @@
 #!/bin/bash
 
-if [ $# -ne 1 ] || [ "x$1" == "x-h" ] ; then
-	echo "Usage: ${BASH_ARGV0} <ver>"
+if [ $# -lt 1 ] || [ $# -gt 2 ] || [ "x$1" == "x-h" ] ; then
+	echo "Usage: ${BASH_ARGV0} [-i] <ver>"
 	exit 1
 fi
 
-V=$1
+if [ $# -eq 1 ] ; then
+	I=false
+	V=$1
+else
+	I=true
+	V=$2
+fi
 
 curl --silent --output /dev/null --fail "https://github.com/ollama/ollama/releases/download/v${V}/sha256sum.txt"
 
@@ -20,3 +26,10 @@ cd "${D}"
 for F in ollama-linux-amd64-rocm ollama-linux-amd64 ; do
 	curl --location --continue-at - --output "${F}.tgz" "https://github.com/ollama/ollama/releases/download/v${V}/${F}.tgz"
 done
+
+if $I ; then
+	echo
+	for F in ollama-linux-amd64 ollama-linux-amd64-rocm ; do
+		pv -N $F ${F}.tgz | tar -C $HOME -zxf -
+	done
+fi
